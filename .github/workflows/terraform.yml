@@ -1,0 +1,30 @@
+name: Terraform with LocalStack
+
+on: [push]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - "4566:4566" # LocalStack exposes services on 4566 by default
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0 # Adjust to match your Terraform version requirement
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
