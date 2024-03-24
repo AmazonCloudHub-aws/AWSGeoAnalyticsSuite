@@ -1,27 +1,21 @@
-name: Terraform with LocalStack
+name: Terraform with AWS
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build-and-lint:
     runs-on: ubuntu-latest
-    services:
-      localstack:
-        image: localstack/localstack
-        ports:
-          - "4566:4566" # Default port for LocalStack services
-
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
 
       - name: Cache Python dependencies
         uses: actions/cache@v2
@@ -29,19 +23,19 @@ jobs:
           path: |
             ~/.cache/pip
             !~/.cache/pip/log
-          key: ${{ runner.os }}-py-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-py-3.8-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-py-${{ matrix.python-version }}-
+            ${{ runner.os }}-py-3.8-
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2 # Updated to use v2 for the latest features
+        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
         env:
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: terraform plan
