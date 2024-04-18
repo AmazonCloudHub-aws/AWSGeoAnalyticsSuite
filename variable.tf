@@ -1,4 +1,4 @@
-
+## General ##
 variable "subnet_id" {
   description = "Subnet ID for EMR cluster"
   type        = string
