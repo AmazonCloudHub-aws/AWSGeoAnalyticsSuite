@@ -29,6 +29,8 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.0.0"
 
       - name: Terraform Init
         run: terraform init
@@ -39,3 +41,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: terraform plan
+
+      # Optional: Apply Terraform changes conditionally
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve
