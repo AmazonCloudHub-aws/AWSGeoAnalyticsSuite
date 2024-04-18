@@ -1,13 +1,15 @@
 terraform {
+  required_version = ">= 1.0.0"
+
   backend "s3" {
-    bucket         = "terraform-state"
-    key            = "path/to/your/statefile.tfstate"
+    bucket         = "terraform-state-bucket"
+    key            = "state/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "your-lock-table"
+    dynamodb_table = "my-lock-table"
+    encrypt        = true
   }
 }
 
-resource "aws_s3_bucket" "terraform_state_bucket" {
-  bucket = "terraform-state"
-  acl    = "private" 
+provider "aws" {
+  region = "us-east-1"
 }
