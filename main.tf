@@ -539,7 +539,6 @@ resource "aws_iam_policy" "lambda_custom_policy" {
         Action   = ["dynamodb:PutItem", "dynamodb:GetItem"],
         Resource = ["arn:aws:dynamodb:your-region:your-account-id:table/your-table-name"],
       },
-      # Additional permissions as needed
     ]
   })
 }
