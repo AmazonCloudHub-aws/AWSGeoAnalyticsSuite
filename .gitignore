@@ -6,3 +6,22 @@ terraform.tfstate.backup
 
 terraform.tfstate
 .history
+
+
+# Local lambda build artifacts
+build_lambda/
+lambda/function.zip
+
+# Python caches and packaging
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.dist-info/
+*.egg
+*.whl
+.venv/
+venv/
+env/
+pip-wheel-metadata/
