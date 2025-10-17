@@ -7,6 +7,8 @@ The GitHub Actions workflow with Terraform and LocalStack establishes a local de
 1. **GitHub Actions**: Serves as the CI/CD platform that triggers the workflow on code changes, managing the execution of Terraform operations and Python environment setup.
 
 2. **LocalStack**: Simulates AWS services locally, providing a mock cloud environment where Terraform configurations can be applied and tested. LocalStack runs within a Docker container as part of the GitHub Actions workflow.
+  
+Note: this repository now includes a GitHub Actions job that starts LocalStack in CI and runs `terraform plan` against the simulated endpoints. The CI still has a separate job that runs `terraform plan` against real AWS (using provided secrets). This allows quick verification against LocalStack without requiring contributors to run Docker locally.
 
 3. **Terraform**: Manages the infrastructure as code, defining the desired state of cloud resources using configuration files. Terraform operations such as `init` and `plan` are automated within the GitHub Actions workflow, targeting the LocalStack environment.
 
@@ -21,6 +23,8 @@ The GitHub Actions workflow with Terraform and LocalStack establishes a local de
 3. **Local AWS Simulation**: LocalStack is started, simulating the AWS environment locally to allow for the deployment and testing of Terraform configurations without affecting real cloud resources.
 
 4. **Terraform Operations**: Terraform is initialized, and a plan is generated, detailing the changes that would be applied to the infrastructure based on the current code. This step uses LocalStack as the target environment.
+  
+If you prefer to run LocalStack locally, you will need Docker. The CI workflow provides the convenience of running LocalStack in GitHub Actions. To run locally, follow LocalStack docs and set AWS endpoint overrides to `http://localhost:4566`.
 
 ### Benefits
 

@@ -1,0 +1,47 @@
+name: Build Lambda (Amazon Linux)
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'lambda/**'
+      - 'scripts/**'
+
+jobs:
+  build-lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('lambda/requirements.txt') }}
+
+      - name: Build Lambda inside lambci image (Amazon Linux compatible)
+        run: |
+          set -euo pipefail
+          WORKDIR=${{ github.workspace }}
+          LAMBDA_DIR=$WORKDIR/lambda
+          mkdir -p $WORKDIR/build_lambda
+
+          # Use lambci build image which mimics AWS Lambda build environment
+          docker run --rm -v "$WORKDIR":/work lambci/lambda:build-python3.8 /bin/bash -lc '
+            set -e
+            cd /work/lambda
+            if [ -f requirements.txt ]; then
+              pip install -r requirements.txt -t /work/build_lambda/python
+            fi
+            cp *.py /work/build_lambda/python/ 2>/dev/null || true
+            cd /work/build_lambda/python
+            zip -r /work/lambda/function.zip .
+          '
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-function-zip
+          path: lambda/function.zip

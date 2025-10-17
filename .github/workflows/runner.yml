@@ -42,6 +42,76 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         run: terraform plan
 
+  # LocalStack-based terraform plan (runs LocalStack in CI so no Docker needed locally)
+  localstack-plan:
+    runs-on: ubuntu-latest
+    needs: build-and-lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.0.0"
+
+      - name: Start LocalStack
+        uses: localstack/setup-localstack@v1
+        with:
+          services: "s3,kinesis,iam,lambda,ec2,glue,emr,rds,redshift,cloudwatch,iot,sagemaker,sts"
+
+      - name: Wait for LocalStack
+        run: |
+          echo "Waiting for LocalStack to be healthy..."
+          for i in {1..20}; do
+            curl -sS http://localhost:4566/_localstack/health || true
+            status=$(curl -sS http://localhost:4566/_localstack/health || echo "")
+            echo "$status"
+            if echo "$status" | grep -q "running"; then
+              echo "LocalStack healthy"
+              break
+            fi
+            sleep 3
+          done
+
+      - name: Create LocalStack provider override
+        run: |
+          cat > localstack_provider.tf <<'EOF'
+          provider "aws" {
+            region                      = "us-east-1"
+            access_key                  = "test"
+            secret_key                  = "test"
+            skip_credentials_validation = true
+            skip_requesting_account_id  = true
+
+            endpoints {
+              iam         = "http://localhost:4566"
+              s3          = "http://localhost:4566"
+              kinesis     = "http://localhost:4566"
+              lambda      = "http://localhost:4566"
+              ec2         = "http://localhost:4566"
+              glue        = "http://localhost:4566"
+              emr         = "http://localhost:4566"
+              rds         = "http://localhost:4566"
+              redshift    = "http://localhost:4566"
+              cloudwatch  = "http://localhost:4566"
+              iot         = "http://localhost:4566"
+              sagemaker   = "http://localhost:4566"
+              lakeformation = "http://localhost:4566"
+              backup      = "http://localhost:4566"
+            }
+          }
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan (LocalStack)
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: us-east-1
+        run: terraform plan -var="use_localstack=true"
+
       # Optional: Apply Terraform changes conditionally
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'

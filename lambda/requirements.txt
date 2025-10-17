@@ -1,0 +1,3 @@
+boto3
+# obsPy is known to require compiled extensions and system libs; build in Amazon Linux in CI or use a Lambda Layer.
+# obspy==1.3.0

@@ -19,3 +19,9 @@ variable "redshift_master_password" {
   type        = string
 }
 
+variable "use_localstack" {
+  description = "If true, configure provider to use LocalStack endpoints"
+  type        = bool
+  default     = false
+}
+
